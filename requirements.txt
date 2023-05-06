@@ -1,0 +1,5 @@
+binance-connector
+python-binance
+time
+matplotlib
+pytz
