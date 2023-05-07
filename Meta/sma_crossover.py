@@ -1,13 +1,3 @@
-"""
-Author: TraderPy
-Link: https://www.youtube.com/channel/UC9xYCyyR_G3LIuJ_LlTiEVQ
-
-Risk Disclaimer:
-Trading the financial markets imposes a risk of financial loss.
-TraderPy is not responsible for any financial losses that viewers suffer.
-Content is educational only and does not serve as financial advice.
-Information or material is provided ‘as is’ without any warranty.
-"""
 
 # Simple Moving Average Crossover Strategy
 
@@ -49,7 +39,8 @@ def close_order(ticket):
 
     for pos in positions:
         tick = mt5.symbol_info_tick(pos.symbol)
-        type_dict = {0: 1, 1: 0}  # 0 represents buy, 1 represents sell - inverting order_type to close the position
+        # 0 represents buy, 1 represents sell - inverting order_type to close the position
+        type_dict = {0: 1, 1: 0}
         price_dict = {0: tick.ask, 1: tick.bid}
 
         if pos.ticket == ticket:
