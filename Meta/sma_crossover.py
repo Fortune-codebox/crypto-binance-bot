@@ -8,26 +8,26 @@ import time
 
 
 # function to send a market order
-def market_order(symbol, volume, order_type, **kwargs):
+def market_order(symbol, volume, direction, **kwargs):
     tick = mt5.symbol_info_tick(symbol)
 
     order_dict = {'buy': 0, 'sell': 1}
     price_dict = {'buy': tick.ask, 'sell': tick.bid}
 
-    request = {
+    payload = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
         "volume": volume,
-        "type": order_dict[order_type],
-        "price": price_dict[order_type],
+        "type": order_dict[direction],
+        "price": price_dict[direction],
         "deviation": DEVIATION,
         "magic": 100,
-        "comment": "python market order",
+        "comment": "bot_i market order",
         "type_time": mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_IOC,
     }
 
-    order_result = mt5.order_send(request)
+    order_result = mt5.order_send(payload)
     print(order_result)
 
     return order_result
@@ -44,7 +44,7 @@ def close_order(ticket):
         price_dict = {0: tick.ask, 1: tick.bid}
 
         if pos.ticket == ticket:
-            request = {
+            payload = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "position": pos.ticket,
                 "symbol": pos.symbol,
@@ -53,12 +53,12 @@ def close_order(ticket):
                 "price": price_dict[pos.type],
                 "deviation": DEVIATION,
                 "magic": 100,
-                "comment": "python close order",
+                "comment": "bot_i close order",
                 "type_time": mt5.ORDER_TIME_GTC,
                 "type_filling": mt5.ORDER_FILLING_IOC,
             }
 
-            order_result = mt5.order_send(request)
+            order_result = mt5.order_send(payload)
             print(order_result)
 
             return order_result
@@ -96,9 +96,9 @@ def signal(symbol, timeframe, sma_period):
 if __name__ == '__main__':
 
     # strategy parameters
-    SYMBOL = "EURUSD"
-    VOLUME = 1.0
-    TIMEFRAME = mt5.TIMEFRAME_M1
+    SYMBOL = "BTCUSDm"
+    VOLUME = 0.5
+    TIMEFRAME = mt5.TIMEFRAME_M5
     SMA_PERIOD = 10
     DEVIATION = 20
 
