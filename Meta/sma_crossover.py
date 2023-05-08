@@ -66,7 +66,22 @@ def close_order(ticket):
     return 'Ticket does not exist'
 
 
+def money_management():
+    balance = round(float(mt5.account_info()._asdict()['balance']), 2)
+    val = 0.00
+    if balance > 0:
+        val = 0.03 * balance / 100
+
+        return round(float(val), 2)
+
+    else:
+        return val
+
+    # if(bala)
+
 # function to get the exposure of a symbol
+
+
 def get_exposure(symbol):
     positions = mt5.positions_get(symbol=symbol)
     if positions:
@@ -97,7 +112,7 @@ if __name__ == '__main__':
 
     # strategy parameters
     SYMBOL = "BTCUSDm"
-    VOLUME = 0.5
+    VOLUME = money_management()
     TIMEFRAME = mt5.TIMEFRAME_M5
     SMA_PERIOD = 10
     DEVIATION = 20
