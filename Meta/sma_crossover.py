@@ -114,22 +114,29 @@ if __name__ == '__main__':
         # trading logic
         if direction == 'buy':
             # if we have a BUY signal, close all short positions
-            for pos in mt5.positions_get():
-                if pos.type == 1:  # pos.type == 1 represent a sell order
-                    close_order(pos.ticket)
+            positions = mt5.positions_get(symbol=SYMBOL)
+            if positions:
 
-            # if there are no open positions, open a new long position
-            if not mt5.positions_total():
+                for pos in positions:
+                    if pos.type == 1:  # pos.type == 1 represent a sell order
+                        close_order(pos.ticket)
+
+                # if there are no open positions, open a new long position
+                # if not mt5.positions_total():
+            else:
                 market_order(SYMBOL, VOLUME, direction)
 
         elif direction == 'sell':
             # if we have a SELL signal, close all short positions
-            for pos in mt5.positions_get():
-                if pos.type == 0:  # pos.type == 0 represent a buy order
-                    close_order(pos.ticket)
+            positions = mt5.positions_get(symbol=SYMBOL)
+            if positions:
+                for pos in positions:
+                    if pos.type == 0:  # pos.type == 0 represent a buy order
+                        close_order(pos.ticket)
 
             # if there are no open positions, open a new short position
-            if not mt5.positions_total():
+            # if not mt5.positions_total():
+            else:
                 market_order(SYMBOL, VOLUME, direction)
 
         print('time: ', datetime.now())
