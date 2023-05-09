@@ -20,7 +20,7 @@ class BotF:
         self.mt5.initialize()
 
     def __str__():
-        return "BotT Maintained and Managed By Fortune Codebox"
+        return "BotF Maintained and Managed By Fortune Codebox"
 
     # function to send a market order
 
