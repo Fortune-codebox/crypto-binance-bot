@@ -6,8 +6,6 @@ import pandas as pd  # install using 'pip install pandas'
 from datetime import datetime
 import time
 
-state: list(int)
-
 
 class BotF:
 
