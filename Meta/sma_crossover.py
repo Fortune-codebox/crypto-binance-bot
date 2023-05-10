@@ -9,13 +9,14 @@ import time
 
 class BotF:
 
-    def __init__(self, symbol: str, time_frame: int, sma_period: list(int), deviation: int):
+    def __init__(self, symbol: str, time_frame: int, sma_period: list[int], deviation: int):
         self.mt5 = mt5
         self.pd = pd
         self.symbol = symbol
         self.time_frame = time_frame
         self.sma_period = sma_period
         self.deviation = deviation
+        self.isYen = False
 
         self.mt5.initialize()
 
@@ -98,7 +99,7 @@ class BotF:
         else:
             return val
 
-# function to get the exposure of a symbol
+    # function to get the exposure of a symbol
 
     def get_exposure(self):
         positions = self.mt5.positions_get(symbol=self.symbol)
@@ -131,6 +132,34 @@ class BotF:
             direction = 'sell'
 
         return last_close, sma10, sma21, direction
+    # cxr means closing exchange rate
+
+    def pip_converter(self, volume: float, cxr: float, pip_after_trade: int) -> str:
+        """
+        Calculate pip values: profit and loss
+        # volume: volume for the trade
+        # cxr: closing exchange rate
+        # pip_after_trade: pip gained or loss
+
+        5490.044
+
+        """
+
+        if self.isYen == False:
+            pip = 0.0001
+        else:
+            pip = 0.01
+
+        step1 = volume * pip
+        step2 = step1 / cxr
+        step3 = round(pip_after_trade * step2, 2)
+        if pip_after_trade > 0:
+            res = f"Total Profit: {step3} {self.symbol}"
+
+        else:
+            res = f"Total Loss: {step3} {self.symbol}"
+
+        return res
 
 
 if __name__ == '__main__':
@@ -143,6 +172,8 @@ if __name__ == '__main__':
 
     gbp_HR1 = BotF(symbol=SYMBOL, time_frame=TIMEFRAME,
                    sma_period=SMA_PERIODS, deviation=DEVIATION)
+
+    val = gbp_HR1.pip_converter()
 
     # mt5.initialize()
 
