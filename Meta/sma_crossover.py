@@ -134,6 +134,33 @@ class BotF:
         return last_close, sma10, sma21, direction
     # cxr means closing exchange rate
 
+    def calc_supply_demand_zones(self):
+        """
+        Calculating supply & demand zones
+        """
+
+        rates = self.mt5.copy_rates_from_pos(
+            self.symbol, self.time_frame, 0, 1000)
+
+        rates_df = self.pd.DataFrame(rates)
+
+        highest_high = rates_df['high'].max()
+        lowest_low = rates_df['low'].min()
+
+        fair_price = (highest_high + lowest_low) / 2
+
+        supply_zones = rates_df[rates_df['high'] >=
+                                fair_price + (highest_high - fair_price) * 0.1]['high']
+        demand_zones = rates_df[rates_df['low'] <=
+                                fair_price - (fair_price - lowest_low) * 0.1]['low']
+
+        return supply_zones, demand_zones
+
+    def calc_candle_types(self, frame):
+        '''
+         Calculating different candle types
+        '''
+
     def pip_converter(self, volume: float, cxr: float, pip_after_trade: int) -> str:
         """
         Calculate pip values: profit and loss
