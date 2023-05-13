@@ -5,11 +5,13 @@ import MetaTrader5 as mt5  # install using 'pip install MetaTrader5'
 import pandas as pd  # install using 'pip install pandas'
 from datetime import datetime
 import time
+from candles import Candlesticks
 
 
-class BotF:
+class BotF(Candlesticks):
 
     def __init__(self, symbol: str, time_frame: int, sma_period: list[int], deviation: int):
+        super().__init__()
         self.mt5 = mt5
         self.pd = pd
         self.symbol = symbol
@@ -118,6 +120,15 @@ class BotF:
         bars21 = self.mt5.copy_rates_from_pos(
             self.symbol, self.time_frame, 1, self.sma_period[1])
 
+        day = self.mt5.copy_rates_from_pos(
+            self.symbol, self.mt5.TIMEFRAME_D1, 1, 10)
+
+        day_df = self.pd.DataFrame(day)
+
+        yesterday = self.isDragonFlyDoji(day_df.iloc[-1])
+
+        print("is yesterday's candle a gravestone doji?: ", yesterday)
+
         bars10_df = self.pd.DataFrame(bars10)
         bars21_df = self.pd.DataFrame(bars21)
 
@@ -140,7 +151,7 @@ class BotF:
         """
 
         rates = self.mt5.copy_rates_from_pos(
-            self.symbol, self.time_frame, 0, 1000)
+            self.symbol, self.time_frame, 0, 240)
 
         rates_df = self.pd.DataFrame(rates)
 
