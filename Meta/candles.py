@@ -167,6 +167,7 @@ class Candlesticks:
             return False
 
     def isBearInsideBar(self, frame):
+
         first = frame.iloc[-2]
         second = frame.iloc[-1]
 
@@ -177,6 +178,9 @@ class Candlesticks:
             return False
 
     def isMorningStar(self, frame):
+        if len(frame) < 3:
+            pass
+
         first = frame.iloc[-3]
         second = frame.iloc[-2]
         third = frame.iloc[-1]
@@ -189,6 +193,9 @@ class Candlesticks:
             return False
 
     def isEveningStar(self, frame):
+        if len(frame) < 3:
+            pass
+
         first = frame.iloc[-3]
         second = frame.iloc[-2]
         third = frame.iloc[-1]
