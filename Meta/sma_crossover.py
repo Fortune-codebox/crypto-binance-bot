@@ -175,10 +175,30 @@ class BotF(Candlesticks):
 
         return supply_zones, demand_zones
 
-    def calc_candle_types(self, frame):
+    def calc_candle_type(self, frame):
         '''
-         Calculating different candle types
+         Checking different candle types
         '''
+        if self.isDoji(frame):
+            return "Doji"
+        elif self.isDragonFlyDoji(frame):
+            return "DragonFly Doji"
+        elif self.isGravestoneDoji(frame):
+            return "Gravestone Doji"
+        elif self.isHammer(frame):
+            return "Hammer"
+        elif self.isShootingstar(frame):
+            return "Shooting Star"
+        elif self.isSpinningTop(frame):
+            return "Spinning Top"
+        elif self.isSpinningBottom(frame):
+            return "Spinning Bottom"
+        elif self.isBullMaburuzu(frame):
+            return "Bullish Maburuzu"
+        elif self.isBearMaburuzu(frame):
+            return "Bearish Maburuzu"
+        else:
+            return "Normal"
 
     def pip_converter(self, volume: float, cxr: float, pip_after_trade: int) -> str:
         """
