@@ -42,13 +42,13 @@ class Candlesticks:
         # return False
 
     def isDragonFlyDoji(self, frame):
-        body = abs(frame.open - frame.open)
+        body = abs(frame.open - frame.close)
         candle = abs(frame.high - frame.low)
 
         percentage = round(float((body/candle) * 1), 2)
 
         mid = (frame.high + frame.low) / 2
-        h = mid + ((frame.high - mid) * 0.4)
+        h = mid + ((frame.high - mid) * 0.3)
         if percentage <= 0.1 and frame.open >= h and frame.close >= h:
             return True
         else:
@@ -61,7 +61,7 @@ class Candlesticks:
         percentage = round(float((body/candle) * 1), 2)
 
         mid = (frame.high + frame.low) / 2
-        h = mid - ((frame.high - mid) * 0.4)
+        h = mid - ((frame.high - mid) * 0.3)
         if percentage <= 0.1 and frame.open <= h and frame.close <= h:
             return True
         else:

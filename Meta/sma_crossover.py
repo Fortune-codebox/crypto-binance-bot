@@ -121,9 +121,17 @@ class BotF(Candlesticks):
             self.symbol, self.time_frame, 1, self.sma_period[1])
 
         day = self.mt5.copy_rates_from_pos(
-            self.symbol, self.mt5.TIMEFRAME_D1, 1, 10)
+            self.symbol, self.mt5.TIMEFRAME_D1, 1, 14)
 
         day_df = self.pd.DataFrame(day)
+        checks = []
+        for i in range(len(day_df) - 1):
+            ch = day_df.iloc[(-i-1):(-i-3):-1]
+            res = self.isBullInsideBar(ch)
+
+            checks.append(res)
+
+        print('checks for bullish Inside bar!!!: ', checks)
 
         yesterday = self.isDragonFlyDoji(day_df.iloc[-1])
 
