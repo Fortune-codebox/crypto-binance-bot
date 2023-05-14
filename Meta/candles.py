@@ -10,25 +10,25 @@ class Candlesticks:
 
         percentage = round(float((body/candle) * 1), 2)
 
-        h = average_price + (frame.high - average_price) * 0.1
-        l = average_price - (average_price - frame.low) * 0.1
+        h = average_price + (frame.high - average_price) * 0.025
+        l = average_price - (average_price - frame.low) * 0.025
 
         if frame.close > frame.open:
-            if percentage <= 0.10 and h <= frame.close and l <= frame.open:
+            if percentage <= 0.05 and h >= frame.close and l <= frame.open:
                 return True
 
             else:
                 return False
 
         elif frame.open > frame.close:
-            if percentage <= 0.10 and h <= frame.open and l <= frame.close:
+            if percentage <= 0.05 and h >= frame.open and l <= frame.close:
                 return True
 
             else:
                 return False
 
         elif frame.open == frame.close:
-            if percentage <= 0.10:
+            if percentage <= 0.05:
                 return True
 
             else:
