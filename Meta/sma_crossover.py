@@ -218,8 +218,8 @@ class BotF(Candlesticks):
 
         self.set_bull_engulfing_prices(low_positions)
         self.set_bear_engulfing_prices(high_positions)
-        self.set_bull_insidebar_prices(positions_bull_insidebar)
-        self.set_bear_insidebar_prices(positions_bear_insidebar)
+        self.set_bull_insidebar_prices(low_positions_insidebar)
+        self.set_bear_insidebar_prices(high_positions_insidebar)
 
         # for i in range(len(day_df) - 1):
 
