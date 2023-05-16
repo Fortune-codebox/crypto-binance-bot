@@ -36,11 +36,6 @@ class Candlesticks:
         else:
             return False
 
-        # if percentage <= 0.30 and h <= self.open and l <= self.close:
-        #     return True
-
-        # return False
-
     def isDragonFlyDoji(self, frame):
         body = abs(frame.open - frame.close)
         candle = abs(frame.high - frame.low)
@@ -164,10 +159,13 @@ class Candlesticks:
             return False
 
     def isBullEngulfing(self, frame):
+        # Engulfing candle comprises of two candle sticks and the first candle is entirely engulfed by the
+        # second candle
+        # The second real body is the opposite of the first real body
         first = frame.iloc[-2]
         second = frame.iloc[-1]
 
-        if second.close > first.close and self.isBullMaburuzu(second):
+        if second.close > first.close and second.close > first.open and first.close < first.open and second.close > second.open and self.isBullMaburuzu(second):
             return True
         else:
             return False
@@ -176,7 +174,7 @@ class Candlesticks:
         first = frame.iloc[-2]
         second = frame.iloc[-1]
 
-        if second.close < first.close and self.isBearMaburuzu(second):
+        if second.close < first.close and second.close < first.open and first.close > first.open and second.close < second.open and self.isBearMaburuzu(second):
             return True
         else:
             return False
@@ -185,7 +183,7 @@ class Candlesticks:
         first = frame.iloc[-2]
         second = frame.iloc[-1]
 
-        if second.close > first.close and self.isBearMaburuzu(first):
+        if first.open > second.open and first.open > second.close and second.close > first.close and self.isBearMaburuzu(first):
             return True
 
         else:
@@ -196,7 +194,7 @@ class Candlesticks:
         first = frame.iloc[-2]
         second = frame.iloc[-1]
 
-        if second.close < first.close and self.isBullMaburuzu(first):
+        if first.open < second.open and first.open < second.close and second.close < first.close and self.isBullMaburuzu(first):
             return True
 
         else:

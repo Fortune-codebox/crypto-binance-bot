@@ -20,12 +20,29 @@ class BotF(Candlesticks):
         self.deviation = deviation
         self.isYen = False
 
+        self.is_bull_engulfing_prices = []
+        self.is_bear_engulfing_prices = []
+        self.is_bull_insidebar_prices = []
+        self.is_bear_insidebar_prices = []
+
         self.mt5.initialize()
 
     def __str__():
         return "BotF Maintained and Managed By Fortune Codebox"
 
     # function to send a market order
+
+    def set_bull_engulfing_prices(self, prices):
+        self.is_bull_engulfing_prices = prices
+
+    def set_bear_engulfing_prices(self, prices):
+        self.is_bear_engulfing_prices = prices
+
+    def set_bull_insidebar_prices(self, prices):
+        self.is_bull_insidebar_prices = prices
+
+    def set_bear_insidebar_prices(self, prices):
+        self.is_bear_insidebar_prices = prices
 
     def market_order(self, direction, **kwargs):
         tick = self.mt5.symbol_info_tick(self.symbol)
@@ -114,6 +131,113 @@ class BotF(Candlesticks):
 
     # function to look for trading signals
 
+    def double_candle_signal(self):
+        """
+        Checking the signals with double candle strategy
+        """
+
+        day = self.mt5.copy_rates_from_pos(
+            self.symbol, self.mt5.TIMEFRAME_D1, 1, 100)
+
+        day_df = self.pd.DataFrame(day)
+
+        checks_bullish_engulfing = []
+        checks_bearish_engulfing = []
+        checks_bullish_insidebar = []
+        checks_bearish_insidebar = []
+        double_splits = []
+
+        for i in range(len(day_df) - 1):
+            ch = day_df.iloc[(-i-1):(-i-3):-1]
+            double_splits.append(ch)
+            res_bull = self.isBullEngulfing(ch)
+            res_bear = self.isBearEngulfing(ch)
+            res_bull_in = self.isBullInsideBar(ch)
+            res_bear_in = self.isBearInsideBar(ch)
+
+            checks_bullish_engulfing.append((res_bull, i))
+            checks_bearish_engulfing.append((res_bear, i))
+            checks_bullish_insidebar.append((res_bull_in, i))
+            checks_bearish_insidebar.append((res_bear_in, i))
+
+        is_bull_engulf = [x for x in checks_bullish_engulfing if x[0] == True]
+        is_bear_engulf = [x for x in checks_bearish_engulfing if x[0] == True]
+        is_bull_insidebar = [
+            y for y in checks_bullish_insidebar if y[0] == True]
+        is_bear_insidebar = [
+            y for y in checks_bearish_insidebar if y[0] == True]
+
+        positions_bull_engulf = [double_splits[y[1]] for y in is_bull_engulf]
+        positions_bear_engulf = [double_splits[y[1]] for y in is_bear_engulf]
+        positions_bull_insidebar = [double_splits[y[1]]
+                                    for y in is_bull_insidebar]
+        positions_bear_insidebar = [double_splits[y[1]]
+                                    for y in is_bear_insidebar]
+
+        low_positions = []
+        high_positions = []
+
+        low_positions_insidebar = []
+        high_positions_insidebar = []
+
+        if len(positions_bull_engulf) > 1:
+            for pos in positions_bull_engulf:
+                low_positions.append(
+                    {'high': pos.iloc[1].high, 'low': pos.iloc[1].low})
+        elif len(positions_bull_engulf) == 1:
+            low_positions.append(
+                {'high': positions_bull_engulf[0].iloc[1].high, 'low': positions_bull_engulf[0].iloc[1].low})
+
+        if len(positions_bear_engulf) > 1:
+
+            for pos in positions_bear_engulf:
+                high_positions.append(
+                    {'high': pos.iloc[1].high, 'low': pos.iloc[1].low})
+
+        elif len(positions_bear_engulf) == 1:
+            high_positions.append(
+                {'high': positions_bear_engulf[0].iloc[1].high, 'low': positions_bear_engulf[0].iloc[1].low})
+
+        if len(positions_bull_insidebar) > 1:
+            for pos in positions_bull_insidebar:
+                low_positions_insidebar.append(
+                    {'high': pos.iloc[0].high, 'low': pos.iloc[1].low})
+
+        elif len(positions_bull_insidebar) == 1:
+            low_positions_insidebar.append(
+                {'high': positions_bull_insidebar[0].iloc[0].high, 'low': positions_bull_insidebar[0].iloc[0].low})
+
+        if len(positions_bear_insidebar) > 1:
+            for pos in positions_bear_insidebar:
+                high_positions_insidebar.append(
+                    {'high': pos.iloc[0].high, 'low': pos.iloc[1].low})
+
+        elif len(positions_bear_insidebar) == 1:
+            high_positions_insidebar.append(
+                {'high': positions_bear_insidebar[0].iloc[0].high, 'low': positions_bear_insidebar[0].iloc[0].low})
+
+        self.set_bull_engulfing_prices(low_positions)
+        self.set_bear_engulfing_prices(high_positions)
+        self.set_bull_insidebar_prices(positions_bull_insidebar)
+        self.set_bear_insidebar_prices(positions_bear_insidebar)
+
+        # for i in range(len(day_df) - 1):
+
+        #     first = day_df.iloc[-i-8]
+        #     last = day_df.iloc[-i-2]
+
+        #     # Checking for trends
+
+        #     if first.close < last.close:
+        #         # uptrend
+        #         pass
+
+        #     elif first.close > last.close:
+        #         # downtrend
+        #         pass
+
+        # print('checks for bullish Inside bar!!!: ', checks)
+
     def signal(self):
         bars10 = self.mt5.copy_rates_from_pos(
             self.symbol, self.time_frame, 1, self.sma_period[0])
@@ -124,18 +248,22 @@ class BotF(Candlesticks):
             self.symbol, self.mt5.TIMEFRAME_D1, 1, 14)
 
         day_df = self.pd.DataFrame(day)
-        checks = []
-        for i in range(len(day_df) - 1):
-            ch = day_df.iloc[(-i-1):(-i-3):-1]
-            res = self.isBullInsideBar(ch)
-
-            checks.append(res)
-
-        print('checks for bullish Inside bar!!!: ', checks)
 
         yesterday = self.isDragonFlyDoji(day_df.iloc[-1])
 
         print("is yesterday's candle a gravestone doji?: ", yesterday)
+
+        self.double_candle_signal()
+        print('bullish engulfing high and low within 100 days: ',
+              self.is_bull_engulfing_prices)
+        print('bearish engulfing high and low within 100 days: ',
+              self.is_bear_engulfing_prices)
+
+        print('bullish insidebar high and low within 100 days: ',
+              self.is_bull_insidebar_prices)
+
+        print('bearish insidebar high and low within 100 days: ',
+              self.is_bear_insidebar_prices)
 
         bars10_df = self.pd.DataFrame(bars10)
         bars21_df = self.pd.DataFrame(bars21)
@@ -169,9 +297,9 @@ class BotF(Candlesticks):
         fair_price = (highest_high + lowest_low) / 2
 
         supply_zones = rates_df[rates_df['high'] >=
-                                fair_price + (highest_high - fair_price) * 0.1]['high']
+                                fair_price + (highest_high - fair_price) * 0.7]['high']
         demand_zones = rates_df[rates_df['low'] <=
-                                fair_price - (fair_price - lowest_low) * 0.1]['low']
+                                fair_price - (fair_price - lowest_low) * 0.7]['low']
 
         return supply_zones, demand_zones
 
