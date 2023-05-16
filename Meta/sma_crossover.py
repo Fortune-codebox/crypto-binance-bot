@@ -181,40 +181,40 @@ class BotF(Candlesticks):
         high_positions_insidebar = []
 
         if len(positions_bull_engulf) > 1:
-            for pos in positions_bull_engulf:
+            for i in range(len(positions_bull_engulf)):
                 low_positions.append(
-                    {'high': pos.iloc[1].high, 'low': pos.iloc[1].low})
+                    {'high': positions_bull_engulf[i].iloc[1].high, 'low': positions_bull_engulf[i].iloc[1].low, 'index': is_bull_engulf[i][1]})
         elif len(positions_bull_engulf) == 1:
             low_positions.append(
-                {'high': positions_bull_engulf[0].iloc[1].high, 'low': positions_bull_engulf[0].iloc[1].low})
+                {'high': positions_bull_engulf[0].iloc[1].high, 'low': positions_bull_engulf[0].iloc[1].low, 'index': is_bull_engulf[0][1]})
 
         if len(positions_bear_engulf) > 1:
 
-            for pos in positions_bear_engulf:
+            for i in range(len(positions_bear_engulf)):
                 high_positions.append(
-                    {'high': pos.iloc[1].high, 'low': pos.iloc[1].low})
+                    {'high': positions_bear_engulf[i].iloc[1].high, 'low': positions_bear_engulf[i].iloc[1].low, 'index': is_bear_engulf[i][1]})
 
         elif len(positions_bear_engulf) == 1:
             high_positions.append(
-                {'high': positions_bear_engulf[0].iloc[1].high, 'low': positions_bear_engulf[0].iloc[1].low})
+                {'high': positions_bear_engulf[0].iloc[1].high, 'low': positions_bear_engulf[0].iloc[1].low, 'index': is_bear_engulf[0][1]})
 
         if len(positions_bull_insidebar) > 1:
-            for pos in positions_bull_insidebar:
+            for i in range(len(positions_bull_insidebar)):
                 low_positions_insidebar.append(
-                    {'high': pos.iloc[0].high, 'low': pos.iloc[1].low})
+                    {'high': positions_bull_insidebar[i].iloc[0].high, 'low': positions_bull_insidebar[i].iloc[1].low, 'index': is_bull_insidebar[i][1]})
 
         elif len(positions_bull_insidebar) == 1:
             low_positions_insidebar.append(
-                {'high': positions_bull_insidebar[0].iloc[0].high, 'low': positions_bull_insidebar[0].iloc[0].low})
+                {'high': positions_bull_insidebar[0].iloc[0].high, 'low': positions_bull_insidebar[0].iloc[0].low, 'index': is_bull_insidebar[0][1]})
 
         if len(positions_bear_insidebar) > 1:
-            for pos in positions_bear_insidebar:
+            for i in range(len(positions_bear_insidebar)):
                 high_positions_insidebar.append(
-                    {'high': pos.iloc[0].high, 'low': pos.iloc[1].low})
+                    {'high': positions_bear_insidebar[i].iloc[0].high, 'low': positions_bear_insidebar[i].iloc[1].low, 'index': is_bear_insidebar[i][1]})
 
         elif len(positions_bear_insidebar) == 1:
             high_positions_insidebar.append(
-                {'high': positions_bear_insidebar[0].iloc[0].high, 'low': positions_bear_insidebar[0].iloc[0].low})
+                {'high': positions_bear_insidebar[0].iloc[0].high, 'low': positions_bear_insidebar[0].iloc[0].low, 'index': is_bear_insidebar[0][1]})
 
         self.set_bull_engulfing_prices(low_positions)
         self.set_bear_engulfing_prices(high_positions)
