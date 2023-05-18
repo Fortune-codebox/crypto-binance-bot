@@ -1,7 +1,12 @@
 """Candle Sticks Class & Properties"""
+import numpy as np
+import pandas as pd
 
 
 class Candlesticks:
+
+    def __init__(self) -> None:
+        self.frame_trends: pd.DataFrame
 
     def isDoji(self, frame) -> bool:
         body = abs(frame.open - frame.close)
@@ -235,3 +240,41 @@ class Candlesticks:
 
     def isTweezersTop(self):
         pass
+
+    def calc_fibonacci_levels(self, frame):
+        """
+         Fibonacci levels are 0.236, 0.382, 0.500, 0.618
+        """
+
+    def __adder(self, frame: pd.DataFrame, times):
+        self.frame_trends = frame
+        for i in range(1, times+1):
+            new_col = np.zeros((len(self.frame_trends), 1), dtype=float)
+            frame = np.append(self.frame_trends, new_col, axis=1)
+
+        print('inside Adder: ', self.frame_trends.head(3))
+        return self.frame_trends
+
+    def __deleter(self, frame, index, times):
+        for i in range(1, times + 1):
+            frame = np.delete(frame, index, axis=1)
+
+        return frame
+
+    def __jump(self, frame, jump):
+        frame = frame[jump:]
+        return frame
+
+    def check_trend(self, framed: pd.DataFrame, high, low, index):
+
+        frame = self.__adder(framed, 1)
+
+        for i in range(len(frame)):
+            if frame[i, high] > frame[i-2, low] and frame[i, high] > frame[i-3, low] and frame[i, high] > frame[i-5, low] and frame[i, high] > frame[i-8, low] and frame[i, high] > frame[i-13, low]:
+                self.frame_trends[i, index] = 1
+
+            elif frame[i, high] < frame[i-2, low] and frame[i, high] < frame[i-3, low] and frame[i, high] < frame[i-5, low] and frame[i, high] < frame[i-8, low] and frame[i, high] < frame[i-13, low]:
+                self.frame_trends[i, index] = -1
+
+            else:
+                self.frame_trends[i, index] = 0

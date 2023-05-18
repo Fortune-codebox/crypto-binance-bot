@@ -20,16 +20,15 @@ class BotF(Candlesticks):
         self.deviation = deviation
         self.isYen = False
 
-        self.is_bull_engulfing_prices = []
-        self.is_bear_engulfing_prices = []
-        self.is_bull_insidebar_prices = []
-        self.is_bear_insidebar_prices = []
+        self.bull_engulfing_prices = []
+        self.bear_engulfing_prices = []
+        self.bull_insidebar_prices = []
+        self.bear_insidebar_prices = []
 
         self.mt5.initialize()
 
     def __str__():
         return "BotF Maintained and Managed By Fortune Codebox"
-
     # function to send a market order
 
     def set_bull_engulfing_prices(self, prices):
@@ -141,24 +140,36 @@ class BotF(Candlesticks):
 
         day_df = self.pd.DataFrame(day)
 
+        day_df = day_df[["time", "open", "high", "low", "close"]]
+
+        self.check_trend(day_df, 2, 3, 5)
+
         checks_bullish_engulfing = []
         checks_bearish_engulfing = []
         checks_bullish_insidebar = []
         checks_bearish_insidebar = []
         double_splits = []
 
-        for i in range(len(day_df) - 1):
-            ch = day_df.iloc[(-i-1):(-i-3):-1]
+        for i in range(len(self.frame_trends) - 1):
+            ch = self.frame_trends.iloc[(-i-1):(-i-3):-1]
             double_splits.append(ch)
-            res_bull = self.isBullEngulfing(ch)
-            res_bear = self.isBearEngulfing(ch)
-            res_bull_in = self.isBullInsideBar(ch)
-            res_bear_in = self.isBearInsideBar(ch)
+            # when the 5th element of this row is 1 means on a bull trend
+            # We only want to check for bearish engulfing bar and bearish inside bar on a bull trend
+            if self.frame_trends[i, 5] == 1:
+                res_bear = self.isBearEngulfing(ch)
+                res_bear_in = self.isBearInsideBar(ch)
 
-            checks_bullish_engulfing.append((res_bull, i))
-            checks_bearish_engulfing.append((res_bear, i))
-            checks_bullish_insidebar.append((res_bull_in, i))
-            checks_bearish_insidebar.append((res_bear_in, i))
+                checks_bullish_insidebar.append((res_bull_in, i))
+                checks_bearish_insidebar.append((res_bear_in, i))
+
+            # when the 5th element of this row is -1 means on a bear trend
+            # We only want to check for bullish engulfing bar and bullish inside bar on a bear trend
+            elif self.frame_trends[i, 5] == -1:
+                res_bull = self.isBullEngulfing(ch)
+                res_bull_in = self.isBullInsideBar(ch)
+
+                checks_bullish_engulfing.append((res_bull, i))
+                checks_bearish_engulfing.append((res_bear, i))
 
         is_bull_engulf = [x for x in checks_bullish_engulfing if x[0] == True]
         is_bear_engulf = [x for x in checks_bearish_engulfing if x[0] == True]
@@ -221,23 +232,6 @@ class BotF(Candlesticks):
         self.set_bull_insidebar_prices(low_positions_insidebar)
         self.set_bear_insidebar_prices(high_positions_insidebar)
 
-        # for i in range(len(day_df) - 1):
-
-        #     first = day_df.iloc[-i-8]
-        #     last = day_df.iloc[-i-2]
-
-        #     # Checking for trends
-
-        #     if first.close < last.close:
-        #         # uptrend
-        #         pass
-
-        #     elif first.close > last.close:
-        #         # downtrend
-        #         pass
-
-        # print('checks for bullish Inside bar!!!: ', checks)
-
     def signal(self):
         bars10 = self.mt5.copy_rates_from_pos(
             self.symbol, self.time_frame, 1, self.sma_period[0])
@@ -255,15 +249,15 @@ class BotF(Candlesticks):
 
         self.double_candle_signal()
         print('bullish engulfing high and low within 100 days: ',
-              self.is_bull_engulfing_prices)
+              self.bull_engulfing_prices)
         print('bearish engulfing high and low within 100 days: ',
-              self.is_bear_engulfing_prices)
+              self.bear_engulfing_prices)
 
         print('bullish insidebar high and low within 100 days: ',
-              self.is_bull_insidebar_prices)
+              self.bull_insidebar_prices)
 
         print('bearish insidebar high and low within 100 days: ',
-              self.is_bear_insidebar_prices)
+              self.bear_insidebar_prices)
 
         bars10_df = self.pd.DataFrame(bars10)
         bars21_df = self.pd.DataFrame(bars21)
@@ -279,8 +273,8 @@ class BotF(Candlesticks):
             direction = 'sell'
 
         return last_close, sma10, sma21, direction
-    # cxr means closing exchange rate
 
+    # cxr means closing exchange rate
     def calc_supply_demand_zones(self):
         """
         Calculating supply & demand zones
