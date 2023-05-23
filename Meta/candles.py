@@ -1,6 +1,7 @@
 """Candle Sticks Class & Properties"""
 import numpy as np
 import pandas as pd
+from scipy.signal import savgol_filter, find_peaks
 
 
 class Candlesticks:
@@ -245,15 +246,26 @@ class Candlesticks:
         """
          Fibonacci levels are 0.236, 0.382, 0.500, 0.618
         """
+        max_price = frame['close'].max()
+        min_price = frame['close'].min()
+
+        difference = max_price - min_price
+
+        first_level = max_price - difference * 0.236
+        second_level = max_price - difference * 0.382
+        third_level = max_price - difference * 0.5
+        fourth_level = max_price - difference * 0.618
+
+        return max_price, first_level, second_level, third_level, fourth_level, min_price
 
     def __adder(self, frame: pd.DataFrame, times):
         self.frame_trends = frame
         for i in range(1, times+1):
-            new_col = np.zeros((len(self.frame_trends), 1), dtype=float)
-            frame = np.append(self.frame_trends, new_col, axis=1)
+            # new_col = np.zeros((len(self.frame_trends), 1), dtype=float)
+            # frame = np.append(self.frame_trends, new_col, axis=1)
+            self.frame_trends['trends'] = 0
 
-        print('inside Adder: ', self.frame_trends.head(3))
-        return self.frame_trends
+        # print('inside Adder: ', self.frame_trends.head(3))
 
     def __deleter(self, frame, index, times):
         for i in range(1, times + 1):
@@ -267,14 +279,11 @@ class Candlesticks:
 
     def check_trend(self, framed: pd.DataFrame, high, low, index):
 
-        frame = self.__adder(framed, 1)
+        self.__adder(framed, 1)
 
-        for i in range(len(frame)):
-            if frame[i, high] > frame[i-2, low] and frame[i, high] > frame[i-3, low] and frame[i, high] > frame[i-5, low] and frame[i, high] > frame[i-8, low] and frame[i, high] > frame[i-13, low]:
+        for i in range(len(self.frame_trends) - 1, -1, -1):
+            if self.frame_trends.iloc[i].high > self.frame_trends.iloc[i-2].low and self.frame_trends.iloc[i].high > self.frame_trends.iloc[i-3].low and self.frame_trends.iloc[i].high > self.frame_trends.iloc[i-5].low and self.frame_trends.iloc[i].high > self.frame_trends.iloc[i-8].low and self.frame_trends.iloc[i].high > self.frame_trends.iloc[i-13].low:
                 self.frame_trends[i, index] = 1
 
-            elif frame[i, high] < frame[i-2, low] and frame[i, high] < frame[i-3, low] and frame[i, high] < frame[i-5, low] and frame[i, high] < frame[i-8, low] and frame[i, high] < frame[i-13, low]:
+            elif self.frame_trends.iloc[i].high < self.frame_trends.iloc[i-2, low] and self.frame_trends.iloc[i, high] < self.frame_trends.iloc[i-3, low] and self.frame_trends.iloc[i, high] < self.frame_trends.iloc[i-5, low] and self.frame_trends.iloc[i, high] < self.frame_trends.iloc[i-8, low] and self.frame_trends.iloc[i, high] < self.frame_trends.iloc[i-13, low]:
                 self.frame_trends[i, index] = -1
-
-            else:
-                self.frame_trends[i, index] = 0
