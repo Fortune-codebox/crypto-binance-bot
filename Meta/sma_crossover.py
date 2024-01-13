@@ -274,6 +274,19 @@ class BotF(Candlesticks):
 
         return last_close, sma10, sma21, direction
 
+    def signal50(self):
+        """Signal for 50 ema"""
+    def calc_distance_percentage(self, sma50, last_close):
+        """Calculate percentage from 50 sma"""
+
+        if last_close > sma50 :
+            percentage = ((last_close - sma50) / sma50) * 100
+        else:
+            percentage = ((sma50 - last_close) / sma50) * 100
+
+        return percentage
+
+
     # cxr means closing exchange rate
     def calc_supply_demand_zones(self):
         """
