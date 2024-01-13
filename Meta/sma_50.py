@@ -10,7 +10,7 @@ from candles import Candlesticks
 
 class BotF(Candlesticks):
 
-    def __init__(self, symbol: str, time_frame: int, sma_period: list[int], deviation: int):
+    def __init__(self, symbol: str, time_frame: int, sma_period: list[int], deviation: int, isYen: bool):
         super().__init__()
         self.mt5 = mt5
         self.pd = pd
@@ -18,7 +18,7 @@ class BotF(Candlesticks):
         self.time_frame = time_frame
         self.sma_period = sma_period
         self.deviation = deviation
-        self.isYen = False
+        self.isYen = isYen
 
         self.bull_engulfing_prices = []
         self.bear_engulfing_prices = []
@@ -159,7 +159,7 @@ class BotF(Candlesticks):
 
         return round(percentage, 2)
 
-    def pip_converter(self, volume: float, cxr: float, pip_after_trade: int) -> str:
+    def tp_calc(self, entry: float, target: int, signal: int):
         """
         Calculate pip values: profit and loss
         # volume: volume for the trade
@@ -175,16 +175,13 @@ class BotF(Candlesticks):
         else:
             pip = 0.01
 
-        step1 = volume * pip
-        step2 = step1 / cxr
-        step3 = round(pip_after_trade * step2, 2)
-        if pip_after_trade > 0:
-            res = f"Total Profit: {step3} {self.symbol}"
-
+        step1 = target * pip
+        if signal == 0:
+            tp = entry + step1
         else:
-            res = f"Total Loss: {step3} {self.symbol}"
+          tp = entry - step1
 
-        return res
+        return tp
 
 
 if __name__ == '__main__':
@@ -195,46 +192,52 @@ if __name__ == '__main__':
     SMA_PERIODS = [50]
     DEVIATION = 20
 
-    gbp_HR1 = BotF(symbol=SYMBOL, time_frame=TIMEFRAME,
-                   sma_period=SMA_PERIODS, deviation=DEVIATION)
+    btc_M15 = BotF(symbol=SYMBOL, time_frame=TIMEFRAME,
+                   sma_period=SMA_PERIODS, deviation=DEVIATION, isYen=False)
 
-    val = gbp_HR1.pip_converter()
+    val = btc_M15.pip_converter()
 
     # mt5.initialize()
 
     while True:
         # calculating account exposure
-        exposure = gbp_HR1.get_exposure()
+        exposure = btc_M15.get_exposure()
         # calculating last candle close and simple moving average and checking for trading signal
-        last_close, sma50, direction = gbp_HR1.signal()
+        last_close, sma50, direction = btc_M15.signal()
 
         # trading logic
         if direction == 'buy':
             # if we have a BUY signal, close all short positions
-            positions = gbp_HR1.mt5.positions_get(symbol=SYMBOL)
+            positions = btc_M15.mt5.positions_get(symbol=SYMBOL)
             if positions:
 
                 for pos in positions:
                     if pos.type == 1:  # pos.type == 1 represent a sell order
-                        gbp_HR1.close_order(pos.ticket)
+                        if pos.price_current >= btc_M15.tp_calc(pos.open_price, 100, pos.type):
+                          btc_M15.close_order(pos.ticket)
+                        else:
+                          btc_M15.close_order(pos.ticket)
 
                 # if there are no open positions, open a new long position
                 # if not mt5.positions_total():
             else:
-                gbp_HR1.market_order(direction)
+                btc_M15.market_order(direction)
 
         elif direction == 'sell':
             # if we have a SELL signal, close all short positions
-            positions = gbp_HR1.mt5.positions_get(symbol=SYMBOL)
+            positions = btc_M15.mt5.positions_get(symbol=SYMBOL)
             if positions:
                 for pos in positions:
                     if pos.type == 0:  # pos.type == 0 represent a buy order
-                        gbp_HR1.close_order(pos.ticket)
+                        if pos.price_current <= btc_M15.tp_calc(pos.open_price, 100, pos.type):
+                          btc_M15.close_order(pos.ticket)
+                        else:
+                          btc_M15.close_order(pos.ticket)
 
             # if there are no open positions, open a new short position
             # if not mt5.positions_total():
             else:
-                gbp_HR1.market_order(direction)
+                btc_M15.market_order(direction)
 
         print('time: ', datetime.now())
         print('exposure: ', exposure)
