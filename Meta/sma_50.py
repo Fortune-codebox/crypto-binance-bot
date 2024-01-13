@@ -190,7 +190,7 @@ class BotF(Candlesticks):
 if __name__ == '__main__':
 
     # strategy parameters
-    SYMBOL = "GBPJPYm"
+    SYMBOL = "BTCUSDm"
     TIMEFRAME = mt5.TIMEFRAME_15
     SMA_PERIODS = [50]
     DEVIATION = 20
